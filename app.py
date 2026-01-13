@@ -81,15 +81,14 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # ================================
-# FUNÇÕES AUXILIARES SEGURAS
+# FUNÇÕES AUXILIARES SEGURAS - CORRIGIDAS
 # ================================
 
-def hash_password(password: str) -> str:
-    """Hash seguro para senhas usando bcrypt com salt."""
-    salt = secrets.token_hex(32)
+def hash_password(password: str, salt: str) -> str:
+    """Hash seguro para senhas usando o salt fornecido."""
     return generate_password_hash(salt + password, method='scrypt')
 
-def verify_password(stored_hash: str, password: str, salt: str = "") -> bool:
+def verify_password(stored_hash: str, password: str, salt: str) -> bool:
     """Verifica se a senha corresponde ao hash armazenado."""
     try:
         return check_password_hash(stored_hash, salt + password)
@@ -137,9 +136,9 @@ def ensure_files() -> None:
     """Garante que arquivos necessários existam."""
     try:
         if not USERS_FILE.exists():
-            # Cria admin com senha hasheada
+            # Cria admin com senha hasheada - CORRIGIDO
             admin_salt = generate_salt()
-            admin_hash = hash_password(ADMIN_DEFAULT_PASSWORD)
+            admin_hash = hash_password(ADMIN_DEFAULT_PASSWORD, admin_salt)  # Passa o salt!
             
             users_data = {
                 "admin": {
@@ -886,7 +885,7 @@ def list_alerts():
         return jsonify({"ok": False, "error": str(e)}), 500
 
 # ================================
-# ADMIN
+# ADMIN - CORRIGIDO
 # ================================
 
 @app.route("/panel/login", methods=["GET", "POST"])
@@ -931,7 +930,7 @@ def admin_login():
                     flash("Conta desativada", "error")
                     log_audit(username, "Tentativa de login em conta desativada", "MEDIUM")
                 else:
-                    # Verifica senha
+                    # Verifica senha - CORRIGIDO
                     salt = info.get("salt", "")
                     if verify_password(info.get("password", ""), password, salt):
                         # Login bem-sucedido
@@ -1003,9 +1002,9 @@ def admin_change_password():
             # Verifica senha antiga
             salt = user_info.get("salt", "")
             if verify_password(user_info.get("password", ""), old_password, salt):
-                # Gera novo salt e hash
+                # Gera novo salt e hash - CORRIGIDO
                 new_salt = generate_salt()
-                new_hash = hash_password(new_password)
+                new_hash = hash_password(new_password, new_salt)  # Passa o salt!
                 
                 # Atualiza usuário
                 users[username]["password"] = new_hash
@@ -1085,7 +1084,7 @@ def admin_panel():
 @app.post("/panel/add_trusted")
 @admin_required
 def admin_add_trusted():
-    """Adiciona pessoa de confiança."""
+    """Adiciona pessoa de confiança - CORRIGIDO."""
     name = sanitize_input(request.form.get("trusted_name", "").strip(), 100)
     username = request.form.get("trusted_user", "").strip().lower()
     password = request.form.get("trusted_password", "")
@@ -1127,9 +1126,9 @@ def admin_add_trusted():
         flash(f"Limite de {MAX_TRUSTED_USERS} pessoas de confiança atingido", "error")
         return redirect(url_for("admin_panel"))
     
-    # Gera salt e hash da senha
+    # Gera salt e hash da senha - CORRIGIDO
     salt = generate_salt()
-    password_hash = hash_password(password)
+    password_hash = hash_password(password, salt)  # Passa o salt!
     
     # Cria usuário
     users[username] = {
@@ -1198,7 +1197,7 @@ def admin_update_trusted():
 @app.post("/panel/reset_trusted_password")
 @admin_required
 def admin_reset_trusted_password():
-    """Redefine senha de pessoa de confiança."""
+    """Redefine senha de pessoa de confiança - CORRIGIDO."""
     username = request.form.get("username", "").strip()
     new_password = request.form.get("new_password", "")
     confirm_password = request.form.get("confirm_password", "")
@@ -1214,9 +1213,9 @@ def admin_reset_trusted_password():
             flash("As senhas não coincidem", "error")
             return redirect(url_for("admin_panel"))
         
-        # Gera novo salt e hash
+        # Gera novo salt e hash - CORRIGIDO
         new_salt = generate_salt()
-        new_hash = hash_password(new_password)
+        new_hash = hash_password(new_password, new_salt)  # Passa o salt!
         
         users[username]["password"] = new_hash
         users[username]["salt"] = new_salt
@@ -1357,12 +1356,12 @@ def logout_admin():
     return redirect(url_for("admin_login"))
 
 # ================================
-# PESSOAS DE CONFIANÇA
+# PESSOAS DE CONFIANÇA - CORRIGIDAS
 # ================================
 
 @app.route("/trusted/login", methods=["GET", "POST"])
 def trusted_login():
-    """Login de pessoa de confiança."""
+    """Login de pessoa de confiança - CORRIGIDO."""
     # Se já estiver autenticado, redireciona
     if session.get("authenticated") and session.get("role") == "trusted":
         return redirect(url_for("trusted_panel"))
@@ -1402,7 +1401,7 @@ def trusted_login():
                     flash("Conta desativada", "error")
                     log_audit(username, "Tentativa de login em conta desativada (trusted)", "MEDIUM")
                 else:
-                    # Verifica senha
+                    # Verifica senha - CORRIGIDO
                     salt = info.get("salt", "")
                     if verify_password(info.get("password", ""), password, salt):
                         # Login bem-sucedido
@@ -1473,7 +1472,7 @@ def trusted_panel():
 @app.route("/trusted/change_password", methods=["GET", "POST"])
 @trusted_required
 def trusted_change_password():
-    """Alteração de senha pela pessoa de confiança."""
+    """Alteração de senha pela pessoa de confiança - CORRIGIDO."""
     users = load_users()
     username = session.get("trusted")
     user_info = users.get(username, {})
@@ -1499,9 +1498,9 @@ def trusted_change_password():
             # Verifica senha antiga
             salt = user_info.get("salt", "")
             if verify_password(user_info.get("password", ""), old_password, salt):
-                # Gera novo salt e hash
+                # Gera novo salt e hash - CORRIGIDO
                 new_salt = generate_salt()
-                new_hash = hash_password(new_password)
+                new_hash = hash_password(new_password, new_salt)  # Passa o salt!
                 
                 # Atualiza usuário
                 users[username]["password"] = new_hash
@@ -1578,7 +1577,7 @@ def trusted_profile():
 
 @app.route("/trusted/recover", methods=["GET", "POST"])
 def trusted_recover():
-    """Recuperação de senha (apenas admin pode redefinir)."""
+    """Recuperação de senha (apenas admin pode redefinir) - CORRIGIDO."""
     if session.get("authenticated") and session.get("role") == "admin":
         # Admin está logado, mostrar formulário
         msg = ""
@@ -1598,9 +1597,9 @@ def trusted_recover():
             else:
                 users = load_users()
                 if username in users and users[username].get("role") == "trusted":
-                    # Gera novo salt e hash
+                    # Gera novo salt e hash - CORRIGIDO
                     new_salt = generate_salt()
-                    new_hash = hash_password(new_password)
+                    new_hash = hash_password(new_password, new_salt)  # Passa o salt!
                     
                     users[username]["password"] = new_hash
                     users[username]["salt"] = new_salt
