@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Confiança · Recuperar</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="aurora-bg">
+  <main class="center-wrap">
+    <section class="aurora-card">
+      <div class="topbar">
+        <div class="brand">
+          <div class="brand-dot" aria-hidden="true">♀</div>
+          <div>
+            <h1 class="brand-title">AURORA_MULHER_SEGURA</h1>
+            <div class="brand-sub">Recuperar senha</div>
+          </div>
+        </div>
+        <div class="top-actions">
+          <a class="pill" href="/trusted/login" aria-label="Voltar para login">Login</a>
+        </div>
+      </div>
+
+      <div class="content">
+        <h2 class="h1">RECUPERAR SENHA</h2>
+        <p class="center muted small">Informe usuário e defina nova senha.</p>
+
+        {% if msg %}
+        <div class="alert alert-ok" role="alert">{{ msg }}</div>
+        {% endif %}
+        
+        {% if err %}
+        <div class="alert alert-danger" role="alert">{{ err }}</div>
+        {% endif %}
+
+        <form method="post">
+          <label class="label" for="user-recover">Usuário</label>
+          <input class="input" id="user-recover" name="user" required autocomplete="username">
+          
+          <label class="label" for="new_password-recover">Nova senha</label>
+          <input class="input" id="new_password-recover" type="password" name="new_password" required autocomplete="new-password">
+          
+          <button class="btn btn-primary" type="submit">Redefinir</button>
+        </form>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

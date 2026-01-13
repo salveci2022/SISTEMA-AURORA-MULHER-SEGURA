@@ -1,0 +1,89 @@
+{
+  "name": "Aurora Mulher Segura",
+  "short_name": "Aurora",
+  "description": "Sistema de proteção feminina com botão de pânico e notificações para pessoas de confiança.",
+  "start_url": "/panic",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#050510",
+  "theme_color": "#ff2d55",
+  "orientation": "portrait-primary",
+  "categories": ["safety", "social", "utilities"],
+  "icons": [
+    {
+      "src": "/static/icons/aurora-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/icons/aurora-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/icons/aurora-192-maskable.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/static/icons/aurora-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/static/screenshots/phone.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "platform": "narrow"
+    },
+    {
+      "src": "/static/screenshots/tablet.png",
+      "sizes": "1920x1080",
+      "type": "image/png",
+      "platform": "wide"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Botão de Pânico",
+      "short_name": "SOS",
+      "description": "Acessar o botão de pânico rapidamente",
+      "url": "/panic",
+      "icons": [
+        {
+          "src": "/static/icons/sos-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Painel de Confiança",
+      "short_name": "Painel",
+      "description": "Acessar painel da pessoa de confiança",
+      "url": "/trusted/login"
+    },
+    {
+      "name": "Painel Admin",
+      "short_name": "Admin",
+      "description": "Acessar painel administrativo",
+      "url": "/panel/login"
+    }
+  ],
+  "prefer_related_applications": false,
+  "related_applications": [],
+  "lang": "pt-BR",
+  "dir": "ltr",
+  "display_override": ["window-controls-overlay"],
+  "protocol_handlers": [
+    {
+      "protocol": "web+aurora",
+      "url": "/panic?source=%s"
+    }
+  ]
+}

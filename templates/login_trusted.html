@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Confiança · Aurora</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="aurora-bg">
+  <main class="center-wrap">
+    <section class="aurora-card">
+      <div class="topbar">
+        <div class="brand">
+          <div class="brand-dot" aria-hidden="true">♀</div>
+          <div>
+            <h1 class="brand-title">AURORA_MULHER_SEGURA</h1>
+            <div class="brand-sub">Pessoa de Confiança</div>
+          </div>
+        </div>
+        <div class="top-actions">
+          <a class="pill" href="/panic" aria-label="Ir para painel da mulher">Painel da mulher</a>
+        </div>
+      </div>
+
+      <div class="content">
+        <h2 class="h1">LOGIN</h2>
+        <p class="center muted small">No painel, clique "Ativar som" (Chrome exige 1 clique).</p>
+
+        {% if error %}
+        <div class="alert alert-danger" role="alert">Usuário ou senha inválidos.</div>
+        {% endif %}
+
+        <form method="post">
+          <label class="label" for="user-trusted">Usuário</label>
+          <input class="input" id="user-trusted" name="user" placeholder="ex: maeana" required autocomplete="username">
+          
+          <label class="label" for="password-trusted">Senha</label>
+          <input class="input" id="password-trusted" type="password" name="password" placeholder="••••••••" required autocomplete="current-password">
+          
+          <button class="btn btn-primary" type="submit">Entrar</button>
+        </form>
+
+        <div class="center small muted" style="margin-top:10px">
+          <a class="link" href="/trusted/recover">Esqueci a senha</a> ·
+          <a class="link" href="/panel/login">Admin</a>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

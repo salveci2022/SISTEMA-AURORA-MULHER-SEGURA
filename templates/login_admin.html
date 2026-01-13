@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin · Aurora</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="aurora-bg">
+  <main class="center-wrap">
+    <section class="aurora-card">
+      <div class="topbar">
+        <div class="brand">
+          <div class="brand-dot" aria-hidden="true">♀</div>
+          <div>
+            <h1 class="brand-title">AURORA_MULHER_SEGURA</h1>
+            <div class="brand-sub">Painel Admin</div>
+          </div>
+        </div>
+        <div class="top-actions">
+          <a class="pill" href="/panic" aria-label="Ir para painel da mulher">Painel da mulher</a>
+        </div>
+      </div>
+
+      <div class="content">
+        <h2 class="h1">LOGIN ADMIN</h2>
+        
+        {% if error %}
+        <div class="alert alert-danger" role="alert">Usuário ou senha inválidos.</div>
+        {% endif %}
+
+        <form method="post">
+          <label class="label" for="user-admin">Usuário</label>
+          <input class="input" id="user-admin" name="user" placeholder="admin" required autocomplete="username">
+          
+          <label class="label" for="password-admin">Senha</label>
+          <input class="input" id="password-admin" type="password" name="password" placeholder="••••••••" required autocomplete="current-password">
+          
+          <button class="btn btn-primary" type="submit">Entrar</button>
+        </form>
+
+        <div class="center small muted" style="margin-top:10px">
+          <a class="link" href="/health">Diagnóstico</a>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

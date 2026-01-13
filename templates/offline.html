@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Aurora Mulher Segura - Offline</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="manifest" href="/static/manifest_aurora.json">
+  <meta name="theme-color" content="#ff2d55">
+</head>
+<body class="aurora-bg">
+  <main class="center-wrap">
+    <section class="aurora-card">
+      <div class="topbar">
+        <div class="brand">
+          <div class="brand-dot" aria-hidden="true">♀</div>
+          <div>
+            <h1 class="brand-title">AURORA_MULHER_SEGURA</h1>
+            <div class="brand-sub">Modo Offline</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <h2 class="h1">📶 SEM CONEXÃO</h2>
+        <p class="center">Você está offline no momento.</p>
+        
+        <div class="alert" style="margin: 20px 0;">
+          <p><strong>⚠️ Importante:</strong></p>
+          <p>O botão de pânico <strong>não funcionará</strong> sem internet.</p>
+          <p>As notificações para pessoas de confiança serão enviadas quando a conexão for restaurada.</p>
+        </div>
+
+        <div class="top-actions" style="justify-content: center;">
+          <button class="pill" onclick="location.reload()">Tentar Novamente</button>
+          <button class="pill" onclick="checkConnection()">Verificar Conexão</button>
+        </div>
+
+        <div class="center small muted" style="margin-top: 20px;">
+          <p>Dicas:</p>
+          <p>• Verifique seu Wi-Fi ou dados móveis</p>
+          <p>• Tente reiniciar o aplicativo</p>
+          <p>• Em emergências, ligue para 190</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    function checkConnection() {
+      if (navigator.onLine) {
+        alert('✅ Conexão restaurada! Recarregando...');
+        location.reload();
+      } else {
+        alert('❌ Ainda sem conexão. Verifique sua internet.');
+      }
+    }
+
+    // Tenta reconectar automaticamente
+    let reconnectAttempts = 0;
+    const maxAttempts = 5;
+    
+    function tryReconnect() {
+      if (navigator.onLine) {
+        location.reload();
+      } else if (reconnectAttempts < maxAttempts) {
+        reconnectAttempts++;
+        setTimeout(tryReconnect, 5000); // Tenta a cada 5 segundos
+      }
+    }
+    
+    // Inicia tentativa de reconexão
+    setTimeout(tryReconnect, 10000);
+    
+    // Monitora conexão
+    window.addEventListener('online', () => {
+      alert('✅ Conexão restaurada! Recarregando...');
+      location.reload();
+    });
+  </script>
+</body>
+</html>

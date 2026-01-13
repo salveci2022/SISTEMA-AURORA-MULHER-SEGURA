@@ -1,0 +1,33 @@
+services:
+  - type: web
+    name: aurora-mulher-segura
+    env: python
+    region: oregon  # ou são paulo/sao-paulo se disponível
+    plan: free
+    branch: main
+    buildCommand: |
+      pip install -r requirements.txt
+      python generate_icons.py
+      python migrate_json.py
+    startCommand: gunicorn app:app
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.9.0
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ADMIN_PASSWORD
+        value: Admin123!@#  # ALTERE ISSO!
+      - key: FLASK_ENV
+        value: production
+      - key: CSRF_ENABLED
+        value: "true"
+      - key: MAX_TRUSTED_USERS
+        value: "3"
+      - key: SESSION_TIMEOUT_MINUTES
+        value: "30"
+      - key: MAX_LOGIN_ATTEMPTS
+        value: "5"
+      - key: LOGIN_LOCKOUT_MINUTES
+        value: "15"

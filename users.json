@@ -1,0 +1,10 @@
+{
+  "admin": {
+    "password": "d1376fc5a97c8f4c2aff00e978aaf3f4:46648d4213adcbc6e01b817bb2a229f529c1621f0b52a5f188916da9cad89835",
+    "role": "admin",
+    "name": "Admin Aurora",
+    "created_at": "2026-01-13 11:29:59",
+    "last_login": null,
+    "must_change_password": true
+  }
+}

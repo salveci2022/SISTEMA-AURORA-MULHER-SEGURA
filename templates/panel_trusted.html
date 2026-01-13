@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Confiança · Painel</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="aurora-bg">
+  <main class="center-wrap">
+    <section class="aurora-card">
+      <div class="topbar">
+        <div class="brand">
+          <div class="brand-dot" aria-hidden="true">♀</div>
+          <div>
+            <h1 class="brand-title">AURORA_MULHER_SEGURA</h1>
+            <div class="brand-sub">Painel da Pessoa de Confiança</div>
+          </div>
+        </div>
+        <div class="top-actions">
+          <button class="pill" id="recencyBtn">Recência</button>
+          <button class="pill" id="clearBtn">Limpar</button>
+          <button class="pill" id="logoutBtn">Sair</button>
+        </div>
+      </div>
+
+      <div class="content">
+        <h2 class="h1">CENTRAL SOS</h2>
+        <p class="center muted small">Olá, <strong>{{ display_name }}</strong>. Quando chegar alerta novo, a sirene toca.</p>
+
+        <div class="alert" id="alertBox" role="alert">
+          <div><strong>Último alerta:</strong></div>
+          <div class="small muted" id="lastMeta">Nenhum alerta ainda.</div>
+          <div class="small" id="pretty"></div>
+        </div>
+
+        <div class="top-actions" style="justify-content:center; margin-top:12px">
+          <button class="pill" id="armBtn" type="button" aria-label="Ativar som da sirene">Ativar som</button>
+          <button class="pill" id="muteBtn" type="button" aria-label="Silenciar alarme">Silenciar</button>
+          <button class="pill" id="refreshBtn" type="button" aria-label="Atualizar alertas">Atualizar</button>
+        </div>
+        
+        <!-- Histórico de alertas recentes (oculto inicialmente) -->
+        <div id="historyPanel" style="display:none; margin-top:20px;">
+          <h3 style="font-size:14px; margin-bottom:10px;">📜 Histórico Recente</h3>
+          <div id="historyList" class="list"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+<script>
+  // ================================
+  // CONFIGURAÇÕES E ELEMENTOS
+  // ================================
+  const siren = new Audio('/static/audio/sirene.mp3');
+  siren.loop = true;
+
+  let armed = false;
+  let muted = false;
+  let lastId = 0;
+  let alertHistory = [];
+  const MAX_HISTORY = 10;
+
+  // Elementos do DOM
+  const armBtn = document.getElementById('armBtn');
+  const muteBtn = document.getElementById('muteBtn');
+  const refreshBtn = document.getElementById('refreshBtn');
+  const recencyBtn = document.getElementById('recencyBtn');
+  const clearBtn = document.getElementById('clearBtn');
+  const logoutBtn = document.getElementById('logoutBtn');
+  const lastMeta = document.getElementById('lastMeta');
+  const pretty = document.getElementById('pretty');
+  const historyPanel = document.getElementById('historyPanel');
+  const historyList = document.getElementById('historyList');
+
+  // ================================
+  // FUNÇÕES AUXILIARES
+  // ================================
+  function escapeHtml(text) {
+    if (!text) return '';
+    const map = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#039;'
+    };
+    return text.toString().replace(/[&<>"']/g, m => map[m]);
+  }
+
+  function formatTime(timestamp) {
+    if (!timestamp) return 'Agora mesmo';
+    const date = new Date(timestamp);
+    return date.toLocaleTimeString('pt-BR', { 
+      hour: '2-digit', 
+      minute: '2-digit',
+      second: '2-digit'
+    });
+  }
+
+  // ================================
+  // CONTROLE DE SIRENE
+  // ================================
+  armBtn.addEventListener('click', async () => {
+    try {
+      siren.currentTime = 0;
+      await siren.play();
+      siren.pause();
+      siren.currentTime = 0;
+      armed = true;
+      armBtn.textContent = 'Som ativado ✅';
+      armBtn.setAttribute('aria-label', 'Som ativado');
+    } catch (e) {
+      armBtn.textContent = 'Clique novamente';
+      console.error('Erro ao ativar som:', e);
+    }
+  });
+
+  muteBtn.addEventListener('click', () => {
+    muted = !muted;
+    if (muted) {
+      try {
+        siren.pause();
+        siren.currentTime = 0;
+      } catch(e) {
+        console.error('Erro ao pausar sirene:', e);
+      }
+    }
+    muteBtn.textContent = muted ? 'Ativar alarme' : 'Silenciar';
+    muteBtn.setAttribute('aria-label', muted ? 'Ativar alarme' : 'Silenciar alarme');
+  });
+
+  function playSiren() {
+    if (!armed || muted) return;
+    try {
+      siren.currentTime = 0;
+      siren.play().catch(e => console.warn('Não foi possível tocar sirene:', e));
+      setTimeout(() => {
+        try {
+          siren.pause();
+          siren.currentTime = 0;
+        } catch(e) {
+          console.error('Erro ao parar sirene:', e);
+        }
+      }, 10000);
+    } catch(e) {
+      console.error('Erro ao tocar sirene:', e);
+    }
+  }
+
+  // ================================
+  // MANIPULAÇÃO DE ALERTAS
+  // ================================
+  function renderAlert(alertData) {
+    if (!alertData) {
+      lastMeta.textContent = "Nenhum alerta ainda.";
+      pretty.innerHTML = "";
+      return;
+    }
+    
+    lastMeta.textContent = `ID #${alertData.id} · ${alertData.ts}`;
+
+    const name = alertData.name || "Não informado";
+    const situation = alertData.situation || "Não especificado";
+    const message = alertData.message || "";
+    const loc = alertData.location;
+
+    let locHtml = '<span class="badge">Localização: não disponível</span>';
+    if (loc && typeof loc.lat === "number" && typeof loc.lon === "number") {
+      const lat = loc.lat.toFixed(6);
+      const lon = loc.lon.toFixed(6);
+      const acc = loc.accuracy_m ? Math.round(loc.accuracy_m) + "m" : "—";
+      const maps = `https://www.google.com/maps?q=${lat},${lon}`;
+      locHtml = `
+        <div class="badge">📍 ${lat}, ${lon} · precisão ${acc}</div>
+        <div><a class="link" href="${maps}" target="_blank" rel="noopener noreferrer">Abrir no mapa</a></div>
+      `;
+    }
+
+    pretty.innerHTML = `
+      <div style="margin-top:10px">
+        <div><strong>Nome:</strong> ${escapeHtml(name)}</div>
+        <div><strong>Situação:</strong> ${escapeHtml(situation)}</div>
+        ${message ? `<div><strong>Mensagem:</strong> ${escapeHtml(message)}</div>` : ""}
+        <div style="margin-top:6px">${locHtml}</div>
+      </div>
+    `;
+  }
+
+  function addToHistory(alertData) {
+    if (!alertData) return;
+    
+    // Adicionar ao histórico
+    alertHistory.unshift(alertData);
+    
+    // Manter apenas os últimos X alertas
+    if (alertHistory.length > MAX_HISTORY) {
+      alertHistory = alertHistory.slice(0, MAX_HISTORY);
+    }
+    
+    // Atualizar histórico visual se o painel estiver visível
+    if (historyPanel.style.display !== 'none') {
+      renderHistory();
+    }
+  }
+
+  function renderHistory() {
+    if (!historyList) return;
+    
+    if (alertHistory.length === 0) {
+      historyList.innerHTML = '<div class="alert">Nenhum alerta no histórico.</div>';
+      return;
+    }
+    
+    let html = '';
+    alertHistory.forEach((alert, index) => {
+      const time = formatTime(alert.ts || alert.timestamp);
+      const situation = escapeHtml(alert.situation || 'Não especificado');
+      const name = escapeHtml(alert.name || 'Não informado');
+      
+      html += `
+        <div class="item" style="font-size:11px;">
+          <div>
+            <strong>${index + 1}. ${situation}</strong>
+            <div class="badge">${time} · ${name}</div>
+          </div>
+          <button class="pill" onclick="viewAlertDetails(${index})" style="font-size:10px; padding:4px 8px;">
+            Ver
+          </button>
+        </div>
+      `;
+    });
+    
+    historyList.innerHTML = html;
+  }
+
+  window.viewAlertDetails = function(index) {
+    const alert = alertHistory[index];
+    if (alert) {
+      renderAlert(alert);
+      
+      // Scroll para o topo
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      
+      // Feedback visual
+      lastMeta.style.backgroundColor = 'rgba(255, 45, 85, 0.1)';
+      setTimeout(() => {
+        if (lastMeta) {
+          lastMeta.style.backgroundColor = '';
+        }
+      }, 1000);
+    }
+  };
+
+  // ================================
+  // FUNÇÕES DOS BOTÕES SUPERIORES
+  // ================================
+  recencyBtn.addEventListener('click', function() {
+    // Alternar visibilidade do histórico
+    if (historyPanel.style.display === 'none') {
+      historyPanel.style.display = 'block';
+      recencyBtn.textContent = 'Ocultar Histórico';
+      renderHistory();
+    } else {
+      historyPanel.style.display = 'none';
+      recencyBtn.textContent = 'Recência';
+    }
+  });
+
+  clearBtn.addEventListener('click', function() {
+    if (confirm('Tem certeza que deseja limpar o histórico de alertas?')) {
+      // Limpar histórico
+      alertHistory = [];
+      localStorage.removeItem('trusted_alert_history');
+      
+      // Limpar exibição atual
+      lastMeta.textContent = "Nenhum alerta ainda.";
+      pretty.innerHTML = "";
+      
+      // Parar sirene
+      try {
+        siren.pause();
+        siren.currentTime = 0;
+      } catch(e) {}
+      
+      // Atualizar histórico visual
+      if (historyPanel.style.display !== 'none') {
+        renderHistory();
+      }
+      
+      // Feedback
+      const originalText = clearBtn.textContent;
+      clearBtn.textContent = '✅ Limpo!';
+      setTimeout(() => {
+        clearBtn.textContent = originalText;
+      }, 2000);
+      
+      console.log('Histórico de alertas limpo');
+    }
+  });
+
+  logoutBtn.addEventListener('click', function() {
+    if (confirm('Tem certeza que deseja sair do painel?')) {
+      // Parar sirene e polling
+      try {
+        siren.pause();
+        siren.currentTime = 0;
+      } catch(e) {}
+      
+      if (pollInterval) {
+        clearInterval(pollInterval);
+      }
+      
+      // Redirecionar para logout
+      window.location.href = '/logout_trusted';
+    }
+  });
+
+  // ================================
+  // BUSCA E ATUALIZAÇÃO DE ALERTAS
+  // ================================
+  async function fetchAlerts() {
+    try {
+      const res = await fetch('/api/last_alert?ts=' + Date.now(), {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache'
+        }
+      });
+      const data = await res.json();
+      if (!data.ok) return;
+
+      const alertData = data.last;
+      renderAlert(alertData);
+
+      if (alertData && alertData.id && alertData.id > lastId) {
+        lastId = alertData.id;
+        playSiren();
+        addToHistory(alertData);
+        
+        // Salvar no localStorage
+        try {
+          localStorage.setItem('trusted_alert_history', JSON.stringify(alertHistory));
+        } catch(e) {
+          console.error('Erro ao salvar histórico:', e);
+        }
+      }
+    } catch(e) {
+      console.error('Erro ao buscar alertas:', e);
+    }
+  }
+
+  // ================================
+  // INICIALIZAÇÃO
+  // ================================
+  document.addEventListener('DOMContentLoaded', function() {
+    // Carregar histórico salvo
+    try {
+      const savedHistory = localStorage.getItem('trusted_alert_history');
+      if (savedHistory) {
+        alertHistory = JSON.parse(savedHistory);
+        // Garantir que não exceda o limite
+        if (alertHistory.length > MAX_HISTORY) {
+          alertHistory = alertHistory.slice(0, MAX_HISTORY);
+        }
+      }
+    } catch(e) {
+      console.error('Erro ao carregar histórico:', e);
+    }
+    
+    // Configurar botões
+    refreshBtn.addEventListener('click', fetchAlerts);
+    
+    // Configurar polling
+    const pollInterval = setInterval(fetchAlerts, 2500);
+    
+    // Limpar intervalo ao sair da página
+    window.addEventListener('beforeunload', () => {
+      clearInterval(pollInterval);
+      try {
+        siren.pause();
+        siren.currentTime = 0;
+      } catch(e) {}
+    });
+    
+    // Primeira busca
+    fetchAlerts();
+    
+    console.log('Painel da Pessoa de Confiança inicializado');
+  });
+
+</script>
+</body>
+</html>

@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin · Aurora</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="aurora-bg">
+  <main class="center-wrap">
+    <section class="aurora-card">
+      <div class="topbar">
+        <div class="brand">
+          <div class="brand-dot" aria-hidden="true">♀</div>
+          <div>
+            <h1 class="brand-title">AURORA_MULHER_SEGURA</h1>
+            <div class="brand-sub">Painel Admin</div>
+          </div>
+        </div>
+        <div class="top-actions">
+          <a class="pill" href="/panic">Painel da mulher</a>
+          <a class="pill" href="/logout_admin">Sair</a>
+        </div>
+      </div>
+
+      <div class="content">
+        <h2 class="h1">CADASTRO</h2>
+        <p class="center muted small">Cadastre até 3 pessoas de confiança.</p>
+
+        {% if msg %}
+          <div class="alert alert-ok" role="alert">{{ msg.replace('+',' ') }}</div>
+        {% endif %}
+        {% if err %}
+          <div class="alert alert-danger" role="alert">{{ err.replace('+',' ') }}</div>
+        {% endif %}
+
+        <div class="list" role="list">
+          {% for u, info in trusted.items() %}
+          <div class="item" role="listitem">
+            <div>
+              <strong>{{ info.name }}</strong>
+              <div class="badge">Usuário: {{ u }}</div>
+            </div>
+            <form method="post" action="/panel/delete_trusted" onsubmit="return confirm('Remover {{ info.name }}?');">
+              <input type="hidden" name="username" value="{{ u }}">
+              <button class="pill" type="submit" aria-label="Remover {{ info.name }}">Remover</button>
+            </form>
+          </div>
+          {% endfor %}
+
+          {% if trusted|length == 0 %}
+            <div class="alert" role="status">Nenhuma pessoa cadastrada ainda.</div>
+          {% endif %}
+        </div>
+
+        <form method="post" action="/panel/add_trusted" style="margin-top:14px">
+          <label class="label" for="trusted_name">Nome</label>
+          <input class="input" id="trusted_name" name="trusted_name" placeholder="Ex: Mãe da Ana" required>
+          
+          <label class="label" for="trusted_user">Usuário (login)</label>
+          <input class="input" id="trusted_user" name="trusted_user" placeholder="ex: maeana" required>
+          
+          <label class="label" for="trusted_password">Senha</label>
+          <input class="input" id="trusted_password" name="trusted_password" type="password" placeholder="ex: 1234" required>
+          
+          <button class="btn btn-primary" type="submit">Cadastrar</button>
+        </form>
+
+        <div class="center small muted" style="margin-top:10px">
+          Pessoa de confiança entra em <span class="badge">/trusted/login</span>
+        </div>
+
+        <hr style="margin:16px 0; opacity:.2">
+
+        <div class="center">
+          <a href="/report.pdf" class="btn btn-primary" download="relatorio_ocorrencias.pdf" aria-label="Baixar relatório de ocorrências em PDF">
+            📄 Baixar Relatório de Ocorrência (PDF)
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

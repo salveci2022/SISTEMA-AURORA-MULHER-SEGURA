@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Aurora Mulher Segura - SOS</title>
+  
+  <!-- Meta tags PWA -->
+  <meta name="theme-color" content="#ff2d55">
+  <meta name="description" content="Sistema de proteção feminina com botão de pânico e notificações para pessoas de confiança.">
+  
+  <!-- Manifest e ícones PWA -->
+  <link rel="manifest" href="{{ url_for('static', filename='manifest_aurora.json') }}">
+  <link rel="icon" type="image/png" sizes="192x192" href="{{ url_for('static', filename='icons/aurora-192.png') }}">
+  <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/aurora-192.png') }}">
+  
+  <!-- Configurações iOS -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="Aurora Mulher Segura">
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  
+  <style>
+    /* Estados de conexão */
+    body.offline .sos::after {
+      content: " (offline)";
+      font-size: 0.8em;
+      color: #ff9500;
+      position: absolute;
+      bottom: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    
+    /* Status colors */
+    .status-success { color: #34c759 !important; }
+    .status-error { color: #ff3b30 !important; }
+    .status-warning { color: #ff9500 !important; }
+    .status-info { color: #007aff !important; }
+  </style>
+</head>
+<body class="aurora-bg">
+
+<main class="center-wrap">
+  <section class="aurora-card">
+    <div class="topbar">
+      <div class="brand">
+        <div class="brand-dot" aria-hidden="true">♀</div>
+        <div>
+          <h1 class="brand-title">AURORA_MULHER_SEGURA</h1>
+          <div class="brand-sub">Spy Life · Proteção Feminina 24h</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="content">
+      <h2 class="h1">BOTÃO DE PÂNICO</h2>
+      <p class="center muted small">Versão demonstrativa — treine o fluxo de emergência.</p>
+
+      <div class="top-actions">
+        <button type="button" id="btnReset" class="pill" aria-label="Reiniciar formulário">Reiniciar</button>
+        <button type="button" id="btnClear" class="pill" aria-label="Limpar todos os campos">Limpar</button>
+        <button type="button" id="btnExit" class="pill" aria-label="Sair do sistema">Sair</button>
+      </div>
+
+      {% if trusted and trusted|length > 0 %}
+      <div class="alert" style="margin-top:10px" role="status">
+        <div class="small"><strong>Pessoas de confiança cadastradas:</strong></div>
+        <div class="chips" style="margin-top:8px" role="list">
+          {% for n in trusted %}
+            <div class="chip active" role="listitem" style="cursor:default" aria-label="Pessoa de confiança: {{ n }}">{{ n }}</div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      <form id="panicForm">
+        <label class="label" for="name">Seu nome</label>
+        <input class="input" id="name" name="name" placeholder="Ex: Ana, Maria..." autocomplete="name">
+        
+        <label class="label">Tipo de situação</label>
+        <div class="chips" role="group" aria-label="Seleção de tipo de situação">
+          <button type="button" class="chip" data-situation="Violência física" aria-pressed="false">Violência física</button>
+          <button type="button" class="chip" data-situation="Agressão verbal / ameaças" aria-pressed="false">Agressão verbal / ameaças</button>
+          <button type="button" class="chip" data-situation="Perseguição / Stalking" aria-pressed="false">Perseguição / Stalking</button>
+          <button type="button" class="chip" data-situation="Situação de risco" aria-pressed="false">Situação de risco</button>
+        </div>
+        <input type="hidden" id="selectedSituation" name="situation" value="Violência física">
+
+        <label class="label" for="message">Mensagem (simulação)</label>
+        <textarea class="textarea" id="message" name="message" placeholder="Descreva rapidamente o que está acontecendo (opcional)."></textarea>
+
+        <div class="alert" style="margin-top:10px" role="alert">
+          <label for="shareLocation" style="display:flex;gap:10px;align-items:center;justify-content:center;cursor:pointer">
+            <input type="checkbox" id="shareLocation" name="shareLocation" style="transform:scale(1.15)">
+            <span><strong>Compartilhar localização</strong> (só será pedida se marcar)</span>
+          </label>
+          <div class="center small muted" style="margin-top:6px">
+            Se não marcar, o SOS vai sem localização.
+          </div>
+        </div>
+      </form>
+
+      <div class="sos-wrap">
+        <button class="sos" id="sosBtn" type="button" aria-label="Botão SOS - toque e segure por 1.2 segundos para ativar">
+          <div>
+            <div class="sos-text">SOS</div>
+            <div class="sos-sub">TOQUE E SEGURE</div>
+          </div>
+        </button>
+      </div>
+
+      <div id="status" class="center small" style="min-height:18px" role="status" aria-live="polite"></div>
+
+      <div class="center small muted" style="margin-top:10px">
+        <a class="link" href="/trusted/login">Pessoa de confiança</a> ·
+        <a class="link" href="/panel/login">Admin</a> ·
+        <a class="link" href="/health">Diagnóstico</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- JavaScript principal -->
+<script src="{{ url_for('static', filename='js/panic.js') }}"></script>
+
+<script>
+// ================================
+// INICIALIZAÇÃO E CONFIGURAÇÕES
+// ================================
+
+// Registrar Service Worker para PWA
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("{{ url_for('static', filename='sw_aurora.js') }}")
+      .then(reg => console.log("✅ Service Worker registrado:", reg.scope))
+      .catch(err => console.log("❌ Erro ao registrar Service Worker:", err));
+  });
+}
+
+// ================================
+// MANIPULAÇÃO DOS CHIPS DE SITUAÇÃO
+// ================================
+document.addEventListener('DOMContentLoaded', function() {
+  // Configurar chips de situação
+  const chips = document.querySelectorAll('.chip[data-situation]');
+  const selectedInput = document.getElementById('selectedSituation');
+  
+  chips.forEach(chip => {
+    chip.addEventListener('click', function() {
+      // Remover seleção de todos
+      chips.forEach(c => {
+        c.classList.remove('active');
+        c.setAttribute('aria-pressed', 'false');
+      });
+      
+      // Selecionar este
+      this.classList.add('active');
+      this.setAttribute('aria-pressed', 'true');
+      if (selectedInput) {
+        selectedInput.value = this.dataset.situation;
+      }
+    });
+  });
+
+  // Configurar botões de controle
+  const btnReset = document.getElementById('btnReset');
+  const btnClear = document.getElementById('btnClear');
+  const btnExit = document.getElementById('btnExit');
+  const statusDiv = document.getElementById('status');
+
+  if (btnReset) {
+    btnReset.addEventListener('click', () => {
+      document.getElementById('panicForm').reset();
+      chips.forEach(c => {
+        c.classList.remove('active');
+        c.setAttribute('aria-pressed', 'false');
+      });
+      // Selecionar primeira opção
+      if (chips.length > 0) {
+        chips[0].click();
+      }
+      if (statusDiv) {
+        statusDiv.textContent = 'Formulário reiniciado';
+        statusDiv.className = 'center small status-info';
+        setTimeout(() => {
+          statusDiv.textContent = '';
+          statusDiv.className = 'center small';
+        }, 2000);
+      }
+    });
+  }
+
+  if (btnClear) {
+    btnClear.addEventListener('click', () => {
+      document.getElementById('panicForm').reset();
+      chips.forEach(c => {
+        c.classList.remove('active');
+        c.setAttribute('aria-pressed', 'false');
+      });
+      if (selectedInput) {
+        selectedInput.value = '';
+      }
+      if (statusDiv) {
+        statusDiv.textContent = 'Todos os campos limpos';
+        statusDiv.className = 'center small status-success';
+        setTimeout(() => {
+          statusDiv.textContent = '';
+          statusDiv.className = 'center small';
+        }, 2000);
+      }
+    });
+  }
+
+  if (btnExit) {
+    btnExit.addEventListener('click', () => {
+      if (confirm('Tem certeza que deseja sair do sistema?')) {
+        window.location.href = '/';
+      }
+    });
+  }
+
+  // Selecionar primeira opção por padrão
+  if (chips.length > 0 && !selectedInput.value) {
+    chips[0].click();
+  }
+});
+
+// ================================
+// GERENCIAMENTO DE CONEXÃO E SINCRONIZAÇÃO OFFLINE
+// ================================
+
+document.addEventListener('DOMContentLoaded', function() {
+  const statusDiv = document.getElementById('status');
+  const sosBtn = document.getElementById('sosBtn');
+  
+  // Função para atualizar status da conexão
+  function updateConnectionStatus() {
+    if (!navigator.onLine) {
+      // Offline
+      document.body.classList.add('offline');
+      if (statusDiv) {
+        statusDiv.innerHTML = '<span class="status-warning">⚠️ Você está offline. Alerta será salvo localmente.</span>';
+      }
+      console.log('Aurora: Modo offline detectado');
+    } else {
+      // Online
+      document.body.classList.remove('offline');
+      if (statusDiv && statusDiv.textContent.includes('offline')) {
+        statusDiv.innerHTML = '<span class="status-success">✅ Conexão restaurada!</span>';
+        setTimeout(() => {
+          if (statusDiv) {
+            statusDiv.textContent = '';
+            statusDiv.className = 'center small';
+          }
+        }, 3000);
+      }
+      console.log('Aurora: Online ✅');
+    }
+  }
+
+  // Verificar conexão ao carregar
+  updateConnectionStatus();
+
+  // Monitorar mudanças de conexão
+  window.addEventListener('online', updateConnectionStatus);
+  window.addEventListener('offline', updateConnectionStatus);
+
+  // Configurar sincronização offline (se suportado)
+  if ('serviceWorker' in navigator && sosBtn) {
+    navigator.serviceWorker.ready
+      .then(registration => {
+        console.log('✅ Service Worker pronto:', registration.active?.scriptURL);
+        
+        // Verificar suporte a SyncManager
+        if ('sync' in registration) {
+          console.log('✅ SyncManager disponível');
+          
+          // Registrar sincronização ao pressionar o botão SOS
+          sosBtn.addEventListener('touchstart', function() {
+            registration.sync.register('sync-alerts')
+              .then(() => {
+                console.log('📡 Sincronização registrada (touch)');
+              })
+              .catch(err => {
+                console.log('SyncManager error:', err);
+              });
+          });
+          
+          sosBtn.addEventListener('mousedown', function() {
+            registration.sync.register('sync-alerts')
+              .then(() => {
+                console.log('📡 Sincronização registrada (mouse)');
+              })
+              .catch(err => {
+                console.log('SyncManager error:', err);
+              });
+          });
+        } else {
+          console.log('ℹ️ SyncManager não disponível, usando fallback');
+        }
+        
+        // Verificar alertas pendentes quando a conexão voltar
+        window.addEventListener('online', function() {
+          registration.sync.getTags?.()
+            .then(tags => {
+              if (tags && tags.includes('sync-alerts')) {
+                console.log('🔄 Alertas pendentes detectados, sincronizando...');
+              }
+            })
+            .catch(() => {
+              // Fallback silencioso
+            });
+        });
+      })
+      .catch(err => {
+        console.log('Service Worker não disponível:', err);
+      });
+  } else {
+    console.log('ℹ️ Service Worker não suportado neste navegador');
+  }
+
+  // Verificar periodicamente por alertas pendentes (fallback)
+  if (localStorage) {
+    setInterval(function() {
+      try {
+        const pendingAlerts = JSON.parse(localStorage.getItem('aurora_pending_alerts') || '[]');
+        if (pendingAlerts.length > 0 && navigator.onLine) {
+          console.log(`📋 ${pendingAlerts.length} alerta(s) pendente(s) encontrado(s)`);
+          
+          // Tentar sincronizar se tiver Service Worker
+          if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.ready
+              .then(registration => {
+                if ('sync' in registration) {
+                  return registration.sync.register('sync-alerts');
+                }
+              })
+              .then(() => {
+                console.log('🔄 Sincronização de alertas pendentes agendada');
+              })
+              .catch(err => {
+                console.log('❌ Não foi possível agendar sincronização:', err);
+              });
+          }
+        }
+      } catch (e) {
+        console.error('❌ Erro ao verificar alertas pendentes:', e);
+      }
+    }, 30000); // Verificar a cada 30 segundos
+  }
+
+  // Função para salvar alerta offline (usada pelo panic.js)
+  window.saveAlertOffline = function(alertData) {
+    try {
+      if (!localStorage) return null;
+      
+      const pendingAlerts = JSON.parse(localStorage.getItem('aurora_pending_alerts') || '[]');
+      alertData.id = 'offline-' + Date.now();
+      alertData.status = 'pending';
+      alertData.created_at = new Date().toISOString();
+      
+      pendingAlerts.push(alertData);
+      localStorage.setItem('aurora_pending_alerts', JSON.stringify(pendingAlerts));
+      
+      console.log(`📦 Alerta offline salvo: ${alertData.id}`);
+      
+      // Mostrar feedback ao usuário
+      if (statusDiv) {
+        statusDiv.innerHTML = `<span class="status-warning">⚠️ Alerta salvo localmente (ID: ${alertData.id.substring(0, 8)})</span>`;
+        setTimeout(() => {
+          if (statusDiv && statusDiv.textContent.includes('salvo localmente')) {
+            statusDiv.textContent = '';
+            statusDiv.className = 'center small';
+          }
+        }, 5000);
+      }
+      
+      // Tentar sincronizar imediatamente
+      if ('serviceWorker' in navigator && 'sync' in navigator.serviceWorker) {
+        navigator.serviceWorker.ready
+          .then(registration => {
+            return registration.sync.register('sync-alerts');
+          })
+          .then(() => {
+            console.log('📡 Sincronização agendada para alerta offline');
+          })
+          .catch(err => {
+            console.log('❌ Não foi possível agendar sincronização:', err);
+          });
+      }
+      
+      return alertData.id;
+    } catch (error) {
+      console.error('❌ Erro ao salvar alerta offline:', error);
+      return null;
+    }
+  };
+
+  // Verificar e limpar alertas antigos
+  try {
+    if (localStorage) {
+      const pendingAlerts = JSON.parse(localStorage.getItem('aurora_pending_alerts') || '[]');
+      const now = new Date();
+      const freshAlerts = pendingAlerts.filter(alert => {
+        const created = new Date(alert.created_at);
+        const ageInHours = (now - created) / (1000 * 60 * 60);
+        return ageInHours < 24; // Manter apenas alertas com menos de 24h
+      });
+      
+      if (freshAlerts.length < pendingAlerts.length) {
+        localStorage.setItem('aurora_pending_alerts', JSON.stringify(freshAlerts));
+        console.log(`🗑️ Removidos ${pendingAlerts.length - freshAlerts.length} alertas antigos`);
+      }
+    }
+  } catch (e) {
+    console.error('Erro ao limpar alertas antigos:', e);
+  }
+});
+
+// ================================
+// FUNÇÕES ÚTEIS PARA DEBUG (OPCIONAL)
+// ================================
+
+// Para debug: mostrar informações no console
+console.log('🚀 Aurora Mulher Segura - Botão de Pânico');
+console.log('🌐 Online:', navigator.onLine);
+console.log('📱 User Agent:', navigator.userAgent.substring(0, 50) + '...');
+
+// Expor algumas funções para debug (opcional)
+window.auroraDebug = {
+  checkPendingAlerts: function() {
+    try {
+      const pending = JSON.parse(localStorage.getItem('aurora_pending_alerts') || '[]');
+      console.log('📊 Alertas pendentes:', pending.length);
+      return pending;
+    } catch (e) {
+      console.error('Erro:', e);
+      return [];
+    }
+  },
+  
+  clearPendingAlerts: function() {
+    if (confirm('Limpar todos os alertas pendentes?')) {
+      localStorage.removeItem('aurora_pending_alerts');
+      console.log('✅ Alertas pendentes limpos');
+    }
+  },
+  
+  simulateOfflineAlert: function() {
+    const testAlert = {
+      name: 'Teste Offline',
+      situation: 'Violência física',
+      message: 'Este é um alerta de teste salvo offline',
+      timestamp: new Date().toISOString()
+    };
+    
+    const id = window.saveAlertOffline?.(testAlert);
+    if (id) {
+      console.log('✅ Alerta de teste salvo:', id);
+      alert(`Alerta de teste salvo offline com ID: ${id}`);
+    }
+  }
+};
+
+</script>
+
+</body>
+</html>
