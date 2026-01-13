@@ -3,3 +3,5 @@ Flask-WTF==1.1.1
 Werkzeug==2.3.7
 python-dotenv==1.0.0
 gunicorn==21.2.0
+psutil==5.9.5  # Para system_info
+reportlab==4.0.4  # Para relatórios PDF
