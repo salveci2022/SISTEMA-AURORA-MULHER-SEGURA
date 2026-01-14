@@ -1,24 +1,61 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="pt-br">
 <head>
-    <title>Login Admin - Aurora</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Login Admin · Aurora</title>
+
+  <meta name="theme-color" content="#ff2d55">
+  <link rel="icon" type="image/png" sizes="192x192" href="{{ url_for('static', filename='icons/aurora-192.png') }}">
+  <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/aurora-192.png') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
-<body>
-    <h1>Login Administrador</h1>
-    {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            <ul>
-            {% for message in messages %}
-                <li>{{ message }}</li>
+<body class="aurora-bg">
+  <main class="center-wrap">
+    <section class="aurora-card">
+      <div class="topbar">
+        <div class="brand">
+          <div class="brand-dot" aria-hidden="true">♀</div>
+          <div>
+            <h1 class="brand-title">AURORA_MULHER_SEGURA</h1>
+            <div class="brand-sub">Admin · Painel de Controle</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <h2 class="h1">LOGIN ADMINISTRADOR</h2>
+        <p class="center muted small">Acesso restrito. Use suas credenciais de administrador.</p>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              {% if category == 'success' %}
+                <div class="alert alert-ok"><strong>OK:</strong> {{ message }}</div>
+              {% elif category == 'warning' %}
+                <div class="alert"><strong>Atenção:</strong> {{ message }}</div>
+              {% else %}
+                <div class="alert alert-danger"><strong>Erro:</strong> {{ message }}</div>
+              {% endif %}
             {% endfor %}
-            </ul>
-        {% endif %}
-    {% endwith %}
-    
-    <form method="POST">
-        <input type="text" name="user" placeholder="Usuário" required>
-        <input type="password" name="password" placeholder="Senha" required>
-        <button type="submit">Entrar</button>
-    </form>
+          {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('admin_login') }}">
+          <label class="label" for="user">Usuário</label>
+          <input class="input" id="user" name="user" placeholder="admin" autocomplete="username" required>
+
+          <label class="label" for="password">Senha</label>
+          <input class="input" id="password" name="password" type="password" placeholder="••••••••" autocomplete="current-password" required>
+
+          <button type="submit" class="btn btn-primary">Entrar</button>
+        </form>
+
+        <div class="center small muted" style="margin-top:12px;">
+          <a class="link" href="{{ url_for('panic_page') }}">Voltar ao Botão de Pânico</a>
+        </div>
+      </div>
+    </section>
+  </main>
 </body>
 </html>
