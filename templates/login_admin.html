@@ -1,61 +1,51 @@
-<!doctype html>
-<html lang="pt-br">
+<!DOCTYPE html>
+<html lang="pt-BR">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Login Admin · Aurora</title>
-
+  <title>Login Admin - Aurora Mulher Segura</title>
   <meta name="theme-color" content="#ff2d55">
-  <link rel="icon" type="image/png" sizes="192x192" href="{{ url_for('static', filename='icons/aurora-192.png') }}">
-  <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/aurora-192.png') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
-<body class="aurora-bg">
-  <main class="center-wrap">
-    <section class="aurora-card">
-      <div class="topbar">
-        <div class="brand">
-          <div class="brand-dot" aria-hidden="true">♀</div>
-          <div>
-            <h1 class="brand-title">AURORA_MULHER_SEGURA</h1>
-            <div class="brand-sub">Admin · Painel de Controle</div>
-          </div>
-        </div>
+<body>
+  <div class="container">
+    <div class="card" style="max-width:520px;margin:40px auto;">
+      <div class="header" style="margin-bottom:12px;">
+        <div class="title">🛡️ Login Administrador</div>
+        <div class="subtitle" style="opacity:.85">Acesso restrito ao painel de gestão</div>
       </div>
 
-      <div class="content">
-        <h2 class="h1">LOGIN ADMINISTRADOR</h2>
-        <p class="center muted small">Acesso restrito. Use suas credenciais de administrador.</p>
-
-        {% with messages = get_flashed_messages(with_categories=true) %}
-          {% if messages %}
-            {% for category, message in messages %}
-              {% if category == 'success' %}
-                <div class="alert alert-ok"><strong>OK:</strong> {{ message }}</div>
-              {% elif category == 'warning' %}
-                <div class="alert"><strong>Atenção:</strong> {{ message }}</div>
-              {% else %}
-                <div class="alert alert-danger"><strong>Erro:</strong> {{ message }}</div>
-              {% endif %}
+      {% with messages = get_flashed_messages() %}
+        {% if messages %}
+          <div class="alert" style="margin: 10px 0;">
+            {% for message in messages %}
+              <div style="margin:4px 0;">{{ message }}</div>
             {% endfor %}
-          {% endif %}
-        {% endwith %}
+          </div>
+        {% endif %}
+      {% endwith %}
 
-        <form method="POST" action="{{ url_for('admin_login') }}">
+      <form method="POST" action="{{ url_for('admin_login') }}">
+        <div class="field">
           <label class="label" for="user">Usuário</label>
-          <input class="input" id="user" name="user" placeholder="admin" autocomplete="username" required>
-
-          <label class="label" for="password">Senha</label>
-          <input class="input" id="password" name="password" type="password" placeholder="••••••••" autocomplete="current-password" required>
-
-          <button type="submit" class="btn btn-primary">Entrar</button>
-        </form>
-
-        <div class="center small muted" style="margin-top:12px;">
-          <a class="link" href="{{ url_for('panic_page') }}">Voltar ao Botão de Pânico</a>
+          <input class="input" id="user" name="user" type="text" autocomplete="username" placeholder="Digite seu usuário" required>
         </div>
+
+        <div class="field" style="margin-top:12px;">
+          <label class="label" for="pass">Senha</label>
+          <input class="input" id="pass" name="pass" type="password" autocomplete="current-password" placeholder="Digite sua senha" required>
+        </div>
+
+        <div class="row" style="gap:10px;margin-top:16px;display:flex;align-items:center;justify-content:space-between;">
+          <a class="btn small" href="{{ url_for('panic') }}">⬅ Voltar</a>
+          <button class="btn danger" type="submit">Entrar</button>
+        </div>
+      </form>
+
+      <div style="margin-top:14px;opacity:.75;font-size:.9em;">
+        Dica: após o login, acesse o painel em <b>/panel</b> e o histórico em <b>/history</b>.
       </div>
-    </section>
-  </main>
+    </div>
+  </div>
 </body>
 </html>
