@@ -6,66 +6,27 @@
   <title>Diagnóstico - Aurora Mulher Segura</title>
   <link rel="stylesheet" href="/static/css/style.css">
   <style>
-    .diag-wrap{max-width:980px;margin:20px auto;padding:16px}
-    .diag-card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:16px}
-    .diag-grid{display:grid;grid-template-columns:1fr;gap:12px}
-    @media(min-width:900px){.diag-grid{grid-template-columns:1fr 1fr}}
-    pre{overflow:auto;background:rgba(0,0,0,.35);padding:12px;border-radius:12px}
-    a{color:inherit}
+    .wrap{max-width:900px;margin:40px auto;padding:24px}
+    .card{background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:20px}
+    ul{line-height:1.9}
+    code{background:rgba(255,255,255,.08);padding:2px 6px;border-radius:8px}
   </style>
 </head>
 <body>
-  <div class="diag-wrap">
-    <div class="diag-card">
+  <div class="wrap">
+    <div class="card">
       <h2>Diagnóstico do Sistema</h2>
-      <p>Esta página é restrita ao administrador.</p>
-
-      <div class="diag-grid">
-        <div class="diag-card">
-          <h3>Links rápidos</h3>
-          <ul>
-            <li><a href="/panic">Botão de Pânico</a></li>
-            <li><a href="/admin">Painel Admin</a></li>
-            <li><a href="/history">Histórico / Relatório</a></li>
-            <li><a href="/health" target="_blank" rel="noopener">Health (JSON)</a></li>
-          </ul>
-        </div>
-
-        <div class="diag-card">
-          <h3>Status (health)</h3>
-          <div id="healthStatus">Carregando...</div>
-          <pre id="healthJson" style="display:none"></pre>
-        </div>
-      </div>
-
-      <div class="diag-card" style="margin-top:12px">
-        <h3>Dicas rápidas</h3>
-        <ul>
-          <li>Se o PWA não instala, verifique <code>/static/manifest_aurora.json</code> e o ícone <code>aurora-192.png</code>.</li>
-          <li>Se a sirene não tocar em celular, confirme que o áudio é disparado por clique do usuário.</li>
-          <li>Localização precisa de HTTPS e permissão do navegador.</li>
-        </ul>
-      </div>
+      <p>Use esta página para validar rapidamente as rotas principais.</p>
+      <ul>
+        <li>🔴 Botão de Pânico: <a href="/panic">/panic</a></li>
+        <li>🔐 Login Admin: <a href="/login">/login</a> (alias)</li>
+        <li>🛠️ Admin: <a href="/admin">/admin</a> (alias)</li>
+        <li>📜 Histórico/Relatório: <a href="/history">/history</a> (alias)</li>
+        <li>❤️ Health (Render): <a href="/health">/health</a></li>
+        <li>📲 Manifest PWA: <a href="/static/manifest_aurora.json">/static/manifest_aurora.json</a></li>
+      </ul>
+      <p style="opacity:.9">Se <code>/history</code> pedir login, é normal (relatório é admin).</p>
     </div>
   </div>
-
-<script>
-(async function(){
-  try{
-    const res = await fetch('/health', {cache:'no-store'});
-    const data = await res.json();
-    const ok = data && (data.status === 'ok' || data.status === 'healthy');
-    const el = document.getElementById('healthStatus');
-    const pre = document.getElementById('healthJson');
-    el.innerHTML = ok
-      ? '✅ Sistema saudável'
-      : '⚠️ Atenção: health retornou status diferente';
-    pre.style.display = 'block';
-    pre.textContent = JSON.stringify(data, null, 2);
-  }catch(e){
-    document.getElementById('healthStatus').innerHTML = '❌ Não foi possível ler /health';
-  }
-})();
-</script>
 </body>
 </html>

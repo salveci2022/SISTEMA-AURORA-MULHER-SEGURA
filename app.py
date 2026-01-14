@@ -578,36 +578,35 @@ def index():
     """Página inicial."""
     return redirect(url_for("panic_button"))
 
+
 # ================================
-# ALIAS DE ROTAS (compatibilidade)
+# ALIASES / COMPATIBILIDADE DE LINKS
 # ================================
 
 @app.get("/login")
 def login_alias():
-    """Alias para login administrativo."""
+    """Compat: /login -> /panel/login"""
     return redirect(url_for("admin_login"))
 
 @app.get("/admin")
 def admin_alias():
-    """Alias para painel administrativo."""
+    """Compat: /admin -> /panel"""
     return redirect(url_for("admin_panel"))
 
 @app.get("/history")
 def history_alias():
-    """Alias para relatório/histórico (admin)."""
+    """Compat: /history -> relatório (admin)"""
     return redirect(url_for("generate_report"))
 
 @app.get("/diagnostic")
-@admin_required
 def diagnostic_page():
-    """Página de diagnóstico (admin)."""
+    """Página simples para checar rotas e status."""
     return render_template("diagnostic.html")
 
 @app.get("/diagnostico")
-@admin_required
-def diagnostico_page():
-    """Alias PT-BR para diagnóstico (admin)."""
+def diagnostico_alias():
     return redirect(url_for("diagnostic_page"))
+
 @app.get("/panic")
 def panic_button():
     """Botão de pânico."""
