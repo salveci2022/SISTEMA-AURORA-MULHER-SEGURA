@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aurora Mulher Segura - Login Administrador</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 450px;
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+        }
+
+        .login-header h1 {
+            font-size: 28px;
+            color: #764ba2;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .login-header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .logo {
+            font-size: 48px;
+            color: #764ba2;
+            margin-bottom: 15px;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 15px 15px 15px 45px;
+            border: 2px solid #e1e1e1;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background-color: #f9f9f9;
+        }
+
+        .input-group input:focus {
+            border-color: #764ba2;
+            outline: none;
+            background-color: #fff;
+            box-shadow: 0 0 0 3px rgba(118, 75, 162, 0.1);
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 15px;
+            top: 40px;
+            color: #764ba2;
+            font-size: 18px;
+        }
+
+        .btn-entrar {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(to right, #667eea, #764ba2);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-entrar:hover {
+            background: linear-gradient(to right, #5a6fd8, #673f91);
+            transform: translateY(-2px);
+            box-shadow: 0 7px 14px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-entrar:active {
+            transform: translateY(0);
+        }
+
+        .favoritos-link {
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .favoritos-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 15px;
+            display: inline-flex;
+            align-items: center;
+            transition: color 0.3s ease;
+        }
+
+        .favoritos-link a:hover {
+            color: #764ba2;
+            text-decoration: underline;
+        }
+
+        .favoritos-link i {
+            margin-right: 8px;
+            font-size: 16px;
+        }
+
+        .error-message {
+            color: #e74c3c;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #888;
+            font-size: 13px;
+        }
+
+        .footer a {
+            color: #764ba2;
+            text-decoration: none;
+        }
+
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 30px 25px;
+            }
+            
+            .login-header h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <div class="logo">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            <h1>Login Administrador</h1>
+            <p>Aurora Mulher Segura - Painel de Controle</p>
+        </div>
+        
+        <form id="loginForm">
+            <div class="input-group">
+                <label for="usuario">Usuário</label>
+                <div class="input-icon">
+                    <i class="fas fa-user"></i>
+                </div>
+                <input type="text" id="usuario" name="usuario" placeholder="Digite seu nome de usuário" required>
+                <div class="error-message" id="usuario-error">Por favor, digite um usuário válido</div>
+            </div>
+            
+            <div class="input-group">
+                <label for="senha">Senha</label>
+                <div class="input-icon">
+                    <i class="fas fa-lock"></i>
+                </div>
+                <input type="password" id="senha" name="senha" placeholder="Digite sua senha" required>
+                <div class="error-message" id="senha-error">A senha deve ter pelo menos 6 caracteres</div>
+            </div>
+            
+            <button type="submit" class="btn-entrar">
+                <i class="fas fa-sign-in-alt"></i> Entrar
+            </button>
+        </form>
+        
+        <div class="favoritos-link">
+            <a href="#">
+                <i class="fas fa-star"></i> Todos os favoritos
+            </a>
+        </div>
+        
+        <div class="footer">
+            <p>Sistema Aurora Mulher Segura &copy; 2024 | <a href="#">Esqueci minha senha</a></p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginForm = document.getElementById('loginForm');
+            const usuarioInput = document.getElementById('usuario');
+            const senhaInput = document.getElementById('senha');
+            const usuarioError = document.getElementById('usuario-error');
+            const senhaError = document.getElementById('senha-error');
+            
+            // Função para validar formulário
+            function validarFormulario() {
+                let valido = true;
+                
+                // Limpar mensagens de erro
+                usuarioError.style.display = 'none';
+                senhaError.style.display = 'none';
+                
+                // Validar usuário
+                if (usuarioInput.value.trim() === '') {
+                    usuarioError.style.display = 'block';
+                    usuarioInput.style.borderColor = '#e74c3c';
+                    valido = false;
+                } else {
+                    usuarioInput.style.borderColor = '#e1e1e1';
+                }
+                
+                // Validar senha
+                if (senhaInput.value.length < 6) {
+                    senhaError.style.display = 'block';
+                    senhaInput.style.borderColor = '#e74c3c';
+                    valido = false;
+                } else {
+                    senhaInput.style.borderColor = '#e1e1e1';
+                }
+                
+                return valido;
+            }
+            
+            // Adicionar evento de submit ao formulário
+            loginForm.addEventListener('submit', function(event) {
+                event.preventDefault();
+                
+                if (validarFormulario()) {
+                    // Simular envio de dados (substituir por requisição real)
+                    const btnEntrar = document.querySelector('.btn-entrar');
+                    const originalText = btnEntrar.innerHTML;
+                    
+                    btnEntrar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Entrando...';
+                    btnEntrar.disabled = true;
+                    
+                    // Simular requisição ao backend
+                    setTimeout(function() {
+                        // Aqui você faria a requisição real para o backend
+                        // Exemplo com fetch:
+                        // fetch('https://sistema-aurora-mulher-segura.onrender.com/panel/login', {
+                        //     method: 'POST',
+                        //     headers: {'Content-Type': 'application/json'},
+                        //     body: JSON.stringify({
+                        //         usuario: usuarioInput.value,
+                        //         senha: senhaInput.value
+                        //     })
+                        // })
+                        // .then(response => response.json())
+                        // .then(data => {
+                        //     if (data.success) {
+                        //         window.location.href = '/panel/dashboard';
+                        //     } else {
+                        //         alert('Credenciais inválidas');
+                        //     }
+                        // });
+                        
+                        // Simulação de login bem-sucedido
+                        alert('Login realizado com sucesso! Redirecionando...');
+                        
+                        // Redirecionar (substitua pela URL correta do painel)
+                        // window.location.href = 'https://sistema-aurora-mulher-segura.onrender.com/panel/dashboard';
+                        
+                        // Resetar botão (em caso de erro)
+                        btnEntrar.innerHTML = originalText;
+                        btnEntrar.disabled = false;
+                    }, 1500);
+                }
+            });
+            
+            // Validar campos em tempo real
+            usuarioInput.addEventListener('blur', function() {
+                if (usuarioInput.value.trim() === '') {
+                    usuarioError.style.display = 'block';
+                    usuarioInput.style.borderColor = '#e74c3c';
+                } else {
+                    usuarioError.style.display = 'none';
+                    usuarioInput.style.borderColor = '#e1e1e1';
+                }
+            });
+            
+            senhaInput.addEventListener('blur', function() {
+                if (senhaInput.value.length < 6) {
+                    senhaError.style.display = 'block';
+                    senhaInput.style.borderColor = '#e74c3c';
+                } else {
+                    senhaError.style.display = 'none';
+                    senhaInput.style.borderColor = '#e1e1e1';
+                }
+            });
+            
+            // Limpar erros ao digitar
+            usuarioInput.addEventListener('input', function() {
+                usuarioError.style.display = 'none';
+                usuarioInput.style.borderColor = '#e1e1e1';
+            });
+            
+            senhaInput.addEventListener('input', function() {
+                senhaError.style.display = 'none';
+                senhaInput.style.borderColor = '#e1e1e1';
+            });
+        });
+    </script>
+</body>
+</html>
