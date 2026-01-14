@@ -578,35 +578,6 @@ def index():
     """Página inicial."""
     return redirect(url_for("panic_button"))
 
-
-# ================================
-# ALIASES / COMPATIBILIDADE DE LINKS
-# ================================
-
-@app.get("/login")
-def login_alias():
-    """Compat: /login -> /panel/login"""
-    return redirect(url_for("admin_login"))
-
-@app.get("/admin")
-def admin_alias():
-    """Compat: /admin -> /panel"""
-    return redirect(url_for("admin_panel"))
-
-@app.get("/history")
-def history_alias():
-    """Compat: /history -> relatório (admin)"""
-    return redirect(url_for("generate_report"))
-
-@app.get("/diagnostic")
-def diagnostic_page():
-    """Página simples para checar rotas e status."""
-    return render_template("diagnostic.html")
-
-@app.get("/diagnostico")
-def diagnostico_alias():
-    return redirect(url_for("diagnostic_page"))
-
 @app.get("/panic")
 def panic_button():
     """Botão de pânico."""
@@ -1244,3 +1215,33 @@ if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     
     app.run(host=host, port=port, debug=DEBUG_MODE)
+
+
+# ==========================
+# Aliases de rotas (compatibilidade de links)
+# ==========================
+
+@app.get("/login")
+def login_alias():
+    # Alias para login do Admin
+    return redirect(url_for("admin_login"))
+
+@app.get("/admin")
+def admin_alias():
+    # Alias para painel Admin
+    return redirect(url_for("admin_panel"))
+
+@app.get("/history")
+def history_alias():
+    # Alias para histórico/relatório
+    return redirect(url_for("generate_report"))
+
+@app.get("/diagnostic")
+def diagnostic_page():
+    # Página simples de diagnóstico (links principais)
+    return render_template("diagnostic.html", now=now_br_str())
+
+@app.get("/diagnostico")
+def diagnostico_alias():
+    return redirect(url_for("diagnostic_page"))
+

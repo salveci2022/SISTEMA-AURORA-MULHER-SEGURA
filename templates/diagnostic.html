@@ -5,27 +5,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Diagnóstico - Aurora Mulher Segura</title>
   <link rel="stylesheet" href="/static/css/style.css">
-  <style>
-    .wrap{max-width:900px;margin:40px auto;padding:24px}
-    .card{background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:20px}
-    ul{line-height:1.9}
-    code{background:rgba(255,255,255,.08);padding:2px 6px;border-radius:8px}
-  </style>
 </head>
 <body>
-  <div class="wrap">
+  <div class="container">
     <div class="card">
-      <h2>Diagnóstico do Sistema</h2>
-      <p>Use esta página para validar rapidamente as rotas principais.</p>
-      <ul>
-        <li>🔴 Botão de Pânico: <a href="/panic">/panic</a></li>
-        <li>🔐 Login Admin: <a href="/login">/login</a> (alias)</li>
-        <li>🛠️ Admin: <a href="/admin">/admin</a> (alias)</li>
-        <li>📜 Histórico/Relatório: <a href="/history">/history</a> (alias)</li>
-        <li>❤️ Health (Render): <a href="/health">/health</a></li>
-        <li>📲 Manifest PWA: <a href="/static/manifest_aurora.json">/static/manifest_aurora.json</a></li>
-      </ul>
-      <p style="opacity:.9">Se <code>/history</code> pedir login, é normal (relatório é admin).</p>
+      <h2 style="margin:0 0 8px 0;">Diagnóstico do Sistema</h2>
+      <p style="opacity:.85;margin:0 0 16px 0;">Status básico e links principais. Atualizado em: <b>{{ now }}</b></p>
+
+      <div class="grid" style="display:grid;grid-template-columns:1fr;gap:10px;">
+        <a class="btn" href="/panic">🚨 Botão de Pânico</a>
+        <a class="btn" href="/panel/login">🔐 Login Admin (oficial)</a>
+        <a class="btn" href="/panel">🛡️ Painel Admin (oficial)</a>
+        <a class="btn" href="/report.html">📜 Histórico / Relatório (oficial)</a>
+        <a class="btn" href="/health">❤️ Health (Render)</a>
+
+        <hr style="opacity:.2;width:100%;">
+
+        <a class="btn" href="/login">➡️ /login (alias)</a>
+        <a class="btn" href="/admin">➡️ /admin (alias)</a>
+        <a class="btn" href="/history">➡️ /history (alias)</a>
+      </div>
     </div>
   </div>
 </body>
