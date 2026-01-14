@@ -1,49 +1,49 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Login Admin - Aurora Mulher Segura</title>
+  <title>Login Admin - Aurora</title>
+
   <meta name="theme-color" content="#ff2d55">
+  <link rel="icon" type="image/png" sizes="192x192" href="{{ url_for('static', filename='icons/aurora-192.png') }}">
+  <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/aurora-192.png') }}">
+
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
-<body>
-  <div class="container">
-    <div class="card" style="max-width:520px;margin:40px auto;">
-      <div class="header" style="margin-bottom:12px;">
-        <div class="title">🛡️ Login Administrador</div>
-        <div class="subtitle" style="opacity:.85">Acesso restrito ao painel de gestão</div>
+<body class="aurora-bg">
+  <div class="center-wrap">
+    <div class="aurora-card" style="padding: 22px 18px;">
+      <div class="topbar" style="margin-bottom:14px;">
+        <div class="brand">
+          <span class="brand-dot">♀</span>
+          <div>
+            <div class="brand-title">AURORA_MULHER_SEGURA</div>
+            <div class="brand-sub">Admin • Acesso restrito</div>
+          </div>
+        </div>
       </div>
+
+      <h1 style="font-size:1.2rem; margin: 8px 0 14px 0; letter-spacing:.02em;">Login Administrador</h1>
 
       {% with messages = get_flashed_messages() %}
         {% if messages %}
-          <div class="alert" style="margin: 10px 0;">
+          <div class="alert alert-danger" style="margin-bottom:12px;">
             {% for message in messages %}
-              <div style="margin:4px 0;">{{ message }}</div>
+              <div>{{ message }}</div>
             {% endfor %}
           </div>
         {% endif %}
       {% endwith %}
 
-      <form method="POST" action="{{ url_for('admin_login') }}">
-        <div class="field">
-          <label class="label" for="user">Usuário</label>
-          <input class="input" id="user" name="user" type="text" autocomplete="username" placeholder="Digite seu usuário" required>
-        </div>
-
-        <div class="field" style="margin-top:12px;">
-          <label class="label" for="pass">Senha</label>
-          <input class="input" id="pass" name="pass" type="password" autocomplete="current-password" placeholder="Digite sua senha" required>
-        </div>
-
-        <div class="row" style="gap:10px;margin-top:16px;display:flex;align-items:center;justify-content:space-between;">
-          <a class="btn small" href="{{ url_for('panic') }}">⬅ Voltar</a>
-          <button class="btn danger" type="submit">Entrar</button>
-        </div>
+      <form method="POST" autocomplete="off" style="display:flex; flex-direction:column; gap:10px;">
+        <input type="text" name="user" placeholder="Usuário" required>
+        <input type="password" name="password" placeholder="Senha" required>
+        <button class="btn btn-primary" type="submit">Entrar</button>
       </form>
 
-      <div style="margin-top:14px;opacity:.75;font-size:.9em;">
-        Dica: após o login, acesse o painel em <b>/panel</b> e o histórico em <b>/history</b>.
+      <div style="margin-top:12px; opacity:.85; font-size:.9rem;">
+        <a class="btn" href="/panic" style="display:inline-block; text-decoration:none;">Voltar ao Botão de Pânico</a>
       </div>
     </div>
   </div>
